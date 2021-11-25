@@ -2,11 +2,11 @@ import java.util.*;
 
 public class Joueur {
 
-    protected String nom;
+    private String nom;
     protected static int nbCarte, points, refJoueur;
-    protected boolean  estAccuse, idEstRevele, tour, evilEye, accuse;
-    protected ArrayList<CarteRumeur> carteJoueurMain, carteJoueurPlateau;
-    protected Role identite;
+    private boolean  estAccuse, idEstRevele, tour, evilEye, accuse, utiliserEffet, personneUtiliseEvilEye;
+    private ArrayList<CarteRumeur> carteJoueurMain, carteJoueurPlateau;
+    private Role identite;
 
     public Joueur(int refJoueur) { //constructeur de Joueur
         this.refJoueur=refJoueur;
@@ -86,9 +86,34 @@ public class Joueur {
     public void setEvilEye(boolean evilEye) {
         this.evilEye = evilEye;
     }
+
+    public boolean isIdEstRevele() {
+        return idEstRevele;
+    }
+
+    public boolean isUtilisereffet() {
+        return utiliserEffet;
+    }
+
+    public void setUtilisereffet(boolean utilisereffet) {
+        this.utiliserEffet = utilisereffet;
+    }
+
+    public void setIdEstRevele(boolean idEstRevele) {
+        this.idEstRevele = idEstRevele;
+    }
+
+    public boolean isPersonneUtiliseEvilEye() {
+        return personneUtiliseEvilEye;
+    }
+
+    public void setPersonneUtiliseEvilEye(boolean personneUtiliseEvilEye) {
+        this.personneUtiliseEvilEye = personneUtiliseEvilEye;
+    }
+
     public int choisirJoueur(){
         Scanner inputNom = new Scanner(System.in);
-        System.out.println("Entrer nom de la joueur que vous voulez jouer suivant ");
+        System.out.println("Entrer un nom de la joueur  ");
         String nomJoueur = inputNom.nextLine();
         inputNom.close();
         int indiceJoueur = Partie.getInstance().chercherJoueur(nomJoueur);
@@ -107,7 +132,6 @@ public class Joueur {
             this.setIdentite(Role.Villager);
         }
     }
-
     public void ramasserCarte(CarteRumeur carteRumeur){
         this.carteJoueurMain.add(carteRumeur);
     }
@@ -125,41 +149,55 @@ public class Joueur {
             return false;
         }
     }
-
     public void jouerCarte(CarteRumeur carteRumeur){
         this.carteJoueurMain.remove(carteRumeur);
         this.carteJoueurPlateau.add(carteRumeur);
         if (this.estAccuse == true){
             this.effetWitch(carteRumeur);
-            this.estAccuse = false;
+            if (this.isUtilisereffet() == false){
+                this.carteJoueurMain.add(carteRumeur);
+                this.carteJoueurPlateau.remove(carteRumeur);
+                this.setUtilisereffet(true);
+            }
+            else {
+                this.setEstAccuse(false);
+            }
         }
         else{
             this.efffetHunt(carteRumeur);
+            if (this.isUtilisereffet() == false){
+                this.carteJoueurMain.add(carteRumeur);
+                this.carteJoueurPlateau.remove(carteRumeur);
+            }
         }
     }
 
     public void accuser() { //Pour une reférence de joueur donné, la variable estAccusé de l'objet de type Joueur prend la valeur "true".
+        this.setAccuse(true);
         Scanner inputAction=new Scanner(System.in); //création d'un objet de type scanner pour récupérer les inputs de l'utilisateur
-        System.out.println("Quel Joueur voulez vous accuser ? :");
+        System.out.println("Quel Joueur voulez accuser ? :");
         String accuser=inputAction.nextLine();
         inputAction.close();
-        this.setAccuse(true);
+
         int indice = Partie.getInstance().chercherJoueur(accuser);
+        while (Partie.getInstance().getTabjoueur().get(indice).isIdEstRevele() == true){
+            System.out.println("Cette personne est deja releve ID. Veuillez choisir autre joueur ");
+            indice = this.choisirJoueur();
+
+        }
         Partie.getInstance().getTabjoueur().get(indice).setEstAccuse(true);
         while (this.Accuse()){
             Partie.getInstance().getTabjoueur().get(indice).repondreAccusation();
             this.setAccuse(false);
         }
-        this.tour=false;
 
     }
-
     public void effetWitch(CarteRumeur carteRumeur){
-        if ( carteRumeur.getNomCarte().equals(NomCarte.AngryMob)){
+        if ( carteRumeur.getNomCarte().equals(nomCarte.AngryMob)){
             this.setTour(true);
 
         }
-        if (carteRumeur.getNomCarte().equals(NomCarte.TheInquisition)){
+        if (carteRumeur.getNomCarte().equals(nomCarte.TheInquisition)){
             System.out.println("Ce sont vos cartes ");
             for( int i = 0; i< this.carteJoueurMain.size(); i++){
                 System.out.println(this.carteJoueurMain.get(i).getNomCarte());
@@ -174,9 +212,10 @@ public class Joueur {
 
 
         }
-        if (carteRumeur.getNomCarte().equals(NomCarte.PointedHat)){
+        if (carteRumeur.getNomCarte().equals(nomCarte.PointedHat)){
             if (this.carteJoueurPlateau.size() == 0){
-                System.out.println("Vous pouvez pas utiliser cette carte ");
+                System.out.println("Vous ne pouvez pas utiliser cette carte ");
+                this.setUtilisereffet(false);
             }
             else{
                 System.out.println("Ce sont vos carte sur plateau ");
@@ -192,32 +231,51 @@ public class Joueur {
                 this.setTour(true);
             }
         }
-        if (carteRumeur.getNomCarte().equals(NomCarte.BroomStick)){
-            this.setTour(true);
+        if (carteRumeur.getNomCarte().equals(nomCarte.BroomStick)){
+                this.setTour(true);
         }
-        if (carteRumeur.getNomCarte().equals(NomCarte.Wart)){
-            this.setTour(true);
+        if (carteRumeur.getNomCarte().equals(nomCarte.Wart)){
+                this.setTour(true);
         }
-        if (carteRumeur.getNomCarte().equals(NomCarte.DuckingStool)) {
+        if (carteRumeur.getNomCarte().equals(nomCarte.DuckingStool)) {
+            boolean check = false;
             int indiceJoueur = this.choisirJoueur();
+
+            while(check == false){
+                boolean checkCarte = true;
+                for (int i =0; i < Partie.getInstance().getTabjoueur().get(indiceJoueur).getCarteJoueurPlateau().size(); i++ ){
+                    if(Partie.getInstance().getTabjoueur().get(indiceJoueur).getCarteJoueurPlateau().get(i).getNomCarte() == nomCarte.Wart){
+                        checkCarte = false;
+                    }
+                }
+                if (checkCarte == false){
+                    System.out.println("Mauvais saisir. Veuillez choisir autre joueur ");
+                    indiceJoueur = this.choisirJoueur();
+                }
+                else{
+                    check = true;
+                }
+
+            }
             Partie.getInstance().getTabjoueur().get(indiceJoueur).setTour(true);
 
         }
-        if (carteRumeur.getNomCarte().equals(NomCarte.EvilEye)){
+        if (carteRumeur.getNomCarte().equals(nomCarte.EvilEye)){
             int indiceJoueur  = this.choisirJoueur();
             Partie.getInstance().getTabjoueur().get(indiceJoueur).setTour(true);
             Partie.getInstance().getTabjoueur().get(indiceJoueur).setEvilEye(true);
+            this.setPersonneUtiliseEvilEye(true);
         }
-        if (carteRumeur.getNomCarte().equals(NomCarte.Toad)){
+        if (carteRumeur.getNomCarte().equals(nomCarte.Toad)){
             this.setTour(true);
         }
-        if (carteRumeur.getNomCarte().equals(NomCarte.BlackCat)){
+        if (carteRumeur.getNomCarte().equals(nomCarte.BlackCat)){
             this.setTour(true);
         }
-        if (carteRumeur.getNomCarte().equals(NomCarte.PetNewt)){
+        if (carteRumeur.getNomCarte().equals(nomCarte.PetNewt)){
             this.setTour(true);
         }
-        if (carteRumeur.getNomCarte().equals(NomCarte.HookedNose)){//Permet de trouver le joueur qui accuse
+        if (carteRumeur.getNomCarte().equals(nomCarte.HookedNose)){//Permet de trouver le joueur qui accuse
             this.setTour(true);
             int indicePersonneAccuse = 0;
             boolean check = false;
@@ -245,7 +303,7 @@ public class Joueur {
             Partie.getInstance().getTabjoueur().get(indicePersonneAccuse).getCarteJoueurMain().remove(Partie.getInstance().getTabjoueur().get(indicePersonneAccuse).getCarteJoueurMain().get(numCarte-1));// retire la carte du jeu de la personne qui accuse
 
         }
-        if ( carteRumeur.getNomCarte().equals(NomCarte.Cauldron)){
+        if ( carteRumeur.getNomCarte().equals(nomCarte.Cauldron)){
             this.setTour(true);
             int indicePersonneAccuse = 0;
             boolean check = false;
@@ -259,34 +317,94 @@ public class Joueur {
         }
 
     }
-
-    public void efffetHunt( CarteRumeur carteRumeur){
-        if (carteRumeur.getNomCarte().equals(NomCarte.AngryMob)){
-            int indiceJoueur = this.choisirJoueur();
-            boolean check = Partie.getInstance().getTabjoueur().get(indiceJoueur).revelerId();
-            if (check){
-                this.setPoints(this.getPoints()+2);
-                this.setTour(true);
+    public int repondreDuckingStool(){
+        int choice;
+        Scanner inputChoice = new Scanner(System.in);
+        System.out.println("Vous voulez reveler votre ID ou jeter une carte. Tapper '1' pour reveler, '2' pour jeter une carte ");
+        choice = inputChoice.nextInt();
+        while (choice != 1 && choice !=2){
+            System.out.println("Mauvais saisir. Veuillez resaisir votre choice ");
+            choice = inputChoice.nextInt();
+        }
+        if (choice == 2){
+            Scanner inputNumeroCarte = new Scanner(System.in);
+            System.out.println("Ce sont vos cartes ");
+            for (int i=0; i < this.getCarteJoueurMain().size(); i++){
+                System.out.println(this.getCarteJoueurMain().get(i).getNomCarte());
             }
-            else {
-                this.setPoints(this.getPoints()-2);
-                Partie.getInstance().getTabjoueur().get(indiceJoueur).setTour(true);
+            System.out.println("Tapper le numero de la carte que vous voulez jeter ");
+            int numeroCarte = inputNumeroCarte.nextInt();
+            while (numeroCarte > this.getCarteJoueurMain().size() || numeroCarte < 1){
+                System.out.println("Mauvais saisir. Veuillez resaisir le numero de la carte");
+                numeroCarte = inputNumeroCarte.nextInt();
+            }
+            inputNumeroCarte.close();
+            Partie.getInstance().getCarteDiscarte().add(this.carteJoueurMain.get(numeroCarte));
+            this.carteJoueurMain.remove(this.carteJoueurMain.get(numeroCarte));
+            this.setTour(true);
+
+
+        }
+        return choice;
+
+
+    }
+    public void efffetHunt( CarteRumeur carteRumeur){
+        if (carteRumeur.getNomCarte().equals(nomCarte.AngryMob)){
+            boolean check = false;
+            if (this.idEstRevele == false){
+                System.out.println("Vous ne pouvez pas utiliser cette carte ");
+                this.setUtilisereffet(false);
+            }
+            else{
+                int indiceJoueur = this.choisirJoueur();
+                boolean verifierID;
+                while(check == false){
+                    boolean checkCarte = true;
+                    for (int i =0; i < Partie.getInstance().getTabjoueur().get(indiceJoueur).getCarteJoueurPlateau().size(); i++ ){
+                        if(Partie.getInstance().getTabjoueur().get(indiceJoueur).getCarteJoueurPlateau().get(i).getNomCarte() == nomCarte.BroomStick){
+                            checkCarte = false;
+                        }
+                    }
+                    if (checkCarte == false){
+                        System.out.println("Mauvais saisir. Veuillez choisir autre joueur ");
+                        indiceJoueur = this.choisirJoueur();
+                    }
+                    else{
+                        check = true;
+                    }
+
+                }
+                verifierID = Partie.getInstance().getTabjoueur().get(indiceJoueur).revelerId();
+                if (verifierID){
+                    this.setPoints(this.getPoints()+2);
+                    this.setTour(true);
+
+                }
+                else{
+                    this.setPoints(this.getPoints()-2);
+                    Partie.getInstance().getTabjoueur().get(indiceJoueur).setTour(true);
+                }
+
+
+
 
             }
         }
-        if (carteRumeur.getNomCarte().equals(NomCarte.TheInquisition)){
-            Scanner inputNom = new Scanner(System.in);
-            System.out.println("Entrer nom de la joueur que vous voulez jouer suvant ");
-            String nomJoueur = inputNom.nextLine();
-            inputNom.close();
-            int indiceJoueur = Partie.getInstance().chercherJoueur(nomJoueur);
+        if (carteRumeur.getNomCarte().equals(nomCarte.TheInquisition)){
+            if (this.isIdEstRevele() == false){
+                System.out.println("Vous ne pouvez pas utiliser  cette carte ");
+                this.setUtilisereffet(false);
+            }
+            int indiceJoueur = this.choisirJoueur();
             Partie.getInstance().getTabjoueur().get(indiceJoueur).setTour(true);
             System.out.println("Son ID est "+ Partie.getInstance().getTabjoueur().get(indiceJoueur).getIdentite() );
 
         }
-        if (carteRumeur.getNomCarte().equals(NomCarte.PointedHat)){
+        if (carteRumeur.getNomCarte().equals(nomCarte.PointedHat)){
             if (this.carteJoueurPlateau.size() == 0){
-                System.out.println("Vous pouvez pas utiliser cette carte ");
+                System.out.println("Vous ne pouvez pas utiliser cette carte ");
+                this.setUtilisereffet(false);
             }
             else{
                 System.out.println("Ce sont vos carte sur plateau ");
@@ -305,15 +423,15 @@ public class Joueur {
 
             }
         }
-        if (carteRumeur.getNomCarte().equals(NomCarte.Wart)){
+        if (carteRumeur.getNomCarte().equals(nomCarte.Wart)){
             int indiceJoueur = this.choisirJoueur();
             Partie.getInstance().getTabjoueur().get(indiceJoueur).setTour(true);
         }
-        if (carteRumeur.getNomCarte().equals(NomCarte.BroomStick)){
+        if (carteRumeur.getNomCarte().equals(nomCarte.BroomStick)){
             int indiceJoueur = this.choisirJoueur();
             Partie.getInstance().getTabjoueur().get(indiceJoueur).setTour(true);
         }
-        if (carteRumeur.getNomCarte().equals(NomCarte.HookedNose)){
+        if (carteRumeur.getNomCarte().equals(nomCarte.HookedNose)){
             int indiceJoueur = this.choisirJoueur();
             Partie.getInstance().getTabjoueur().get(indiceJoueur).setTour(true);
             int numCarte =(int) (Math.random()* Partie.getInstance().getTabjoueur().get(indiceJoueur).getCarteJoueurMain().size());
@@ -321,12 +439,12 @@ public class Joueur {
             Partie.getInstance().getTabjoueur().get(indiceJoueur).getCarteJoueurMain().remove(Partie.getInstance().getTabjoueur().get(indiceJoueur).getCarteJoueurMain().get(numCarte));// retire la carte du jeu de la personne qui accuse
 
         }
-        if (carteRumeur.getNomCarte().equals(NomCarte.EvilEye)){
+        if (carteRumeur.getNomCarte().equals(nomCarte.EvilEye)){
             int indiceJoueur  = this.choisirJoueur();
             Partie.getInstance().getTabjoueur().get(indiceJoueur).setTour(true);
             Partie.getInstance().getTabjoueur().get(indiceJoueur).setEvilEye(true);
         }
-        if (carteRumeur.getNomCarte().equals(NomCarte.PetNewt)){
+        if (carteRumeur.getNomCarte().equals(nomCarte.PetNewt)){
             boolean check = false;
             int indiceJoueur = this.choisirJoueur();
             System.out.println(" Veuillez choisir la numero de la carte");
@@ -350,7 +468,106 @@ public class Joueur {
             Partie.getInstance().getTabjoueur().get(indiceJoueur).setTour(true);
 
         }
+        if (carteRumeur.getNomCarte().equals(nomCarte.DuckingStool)){
+            boolean check = false;
+            int indiceJoueur = this.choisirJoueur();
 
+            while(check == false){
+                boolean checkCarte = true;
+                for (int i =0; i < Partie.getInstance().getTabjoueur().get(indiceJoueur).getCarteJoueurPlateau().size(); i++ ){
+                    if(Partie.getInstance().getTabjoueur().get(indiceJoueur).getCarteJoueurPlateau().get(i).getNomCarte() == nomCarte.Wart){
+                        checkCarte = false;
+                    }
+                }
+                if (checkCarte == false){
+                    System.out.println("Mauvais saisir. Veuillez choisir autre joueur ");
+                    indiceJoueur = this.choisirJoueur();
+                }
+                else{
+                    check = true;
+                }
+
+            }
+            int choice = Partie.getInstance().getTabjoueur().get(indiceJoueur).repondreDuckingStool();
+            boolean verifierID;
+            if (choice == 1){
+                verifierID = Partie.getInstance().getTabjoueur().get(indiceJoueur).revelerId();
+                if (verifierID){
+                    this.setPoints(this.getPoints()+1);
+                    this.setTour(true);
+                }
+                else{
+                    Partie.getInstance().getTabjoueur().get(indiceJoueur).setTour(true);
+                    this.setPoints(this.getPoints()-1);
+                }
+            }
+        }
+        if (carteRumeur.getNomCarte().equals(nomCarte.Cauldron)){
+            boolean verifierID;
+            verifierID = this.revelerId();
+            if (verifierID){
+                int indiceJoueur = this.choisirJoueur();
+                Partie.getInstance().getTabjoueur().get(indiceJoueur).setTour(true);
+            }
+            else{
+                int indice = Partie.getInstance().chercherJoueur(this.getNom());
+                if (indice ==0){
+                    int size = Partie.getInstance().getTabjoueur().size();
+                    Partie.getInstance().getTabjoueur().get(size-1).setTour(true);
+                }
+                else{
+                    Partie.getInstance().getTabjoueur().get(indice-1).setTour(true);
+
+                }
+            }
+        }
+        if (carteRumeur.getNomCarte().equals(nomCarte.Toad)){
+            boolean verifierID;
+            verifierID = this.revelerId();
+            if (verifierID){
+                int indiceJoueur = this.choisirJoueur();
+                Partie.getInstance().getTabjoueur().get(indiceJoueur).setTour(true);
+            }
+            else{
+                int indice = Partie.getInstance().chercherJoueur(this.getNom());
+                if (indice ==0){
+                    int size = Partie.getInstance().getTabjoueur().size();
+                    Partie.getInstance().getTabjoueur().get(size-1).setTour(true);
+                }
+                else{
+                    Partie.getInstance().getTabjoueur().get(indice-1).setTour(true);
+
+                }
+            }
+        }
+        if (carteRumeur.getNomCarte().equals(nomCarte.BlackCat)){
+            if (Partie.getInstance().getCarteDiscarte().size() == 0){
+                System.out.println("Vous ne pouvez pas utiliser cette carte ");
+                this.setUtilisereffet(false);
+            }
+            else{
+                System.out.println("Ce sont des cartes jetés");
+                for (int i=0; i <Partie.getInstance().getCarteDiscarte().size(); i++){
+                    System.out.println(Partie.getInstance().getCarteDiscarte().get(i).getNomCarte());
+                }
+                Scanner inputNumeroCarte = new Scanner(System.in);
+
+                System.out.println("Tapper le numero de la carte que vous voulez ajouter a la main ");
+                int numeroCarte = inputNumeroCarte.nextInt();
+                while (numeroCarte > Partie.getInstance().getCarteDiscarte().size() || numeroCarte < 1){
+                    System.out.println("Mauvais saisir. Veuillez resaisir le numero de la carte");
+                    numeroCarte = inputNumeroCarte.nextInt();
+                }
+                inputNumeroCarte.close();
+                this.getCarteJoueurMain().add(Partie.getInstance().getCarteDiscarte().get(numeroCarte));
+                Partie.getInstance().getCarteDiscarte().remove(Partie.getInstance().getCarteDiscarte().get(numeroCarte));
+
+
+
+
+
+            }
+        }
 
 
 
@@ -360,8 +577,6 @@ public class Joueur {
     public void repondreAccusation() { //Méthode décrivant une des actions que peut faire le joueur si ce dernier est accusé : Si le joueur est accusé il peut révéler son identité
 
         if (this.estAccuse==true) {
-
-            this.tour=true;
 
             if(carteJoueurMain.size()==0){
                 this.revelerId();
@@ -374,7 +589,7 @@ public class Joueur {
                 inputAction.close();
                 char action=inputAction.nextLine().charAt(0); //Lis la valeur saisie par l'utilisateur
 
-                while (action!='R' && action!='W') { //condition d'erreur
+                while (action!='R' && action!='W') {
                     System.out.println("Mauvaise saisie, veuillez saisir R ou W\n");
                     action=inputAction.nextLine().charAt(0);
                     inputAction.close();
@@ -384,40 +599,65 @@ public class Joueur {
                     this.revelerId();
                 }
                 else if(action=='W'){
-                    Scanner inputCarteR=new Scanner(System.in);
-                    System.out.println("Quelle carte voulez vous jouer ? : Veuillez saisir le nom de la carte");
-                    String nomCarteR=inputCarteR.nextLine();
-                    int j=0;
-                    while(this.carteJoueurMain.get(j).getNomCarte().equals(nomCarteR)==false){ //tant qu'on ne trouve pas le nom de la carte saisie, on incrémente j
-                        j++;
-                        if(j>carteJoueurMain.size()){ //condition d'erreur
-                            System.out.println("Erreur, veuillez ressasir le nom de la carte");
-                            nomCarteR=inputCarteR.nextLine();
-                            j=0;
-                        }
+                    Scanner inputNumeroCarte = new Scanner(System.in);
+                    System.out.println("Ce sont vos cartes ");
+                    for (int i=0; i < this.getCarteJoueurMain().size(); i++){
+                        System.out.println(this.getCarteJoueurMain().get(i).getNomCarte());
                     }
-                    this.effetWitch(carteJoueurMain.get(j));
+                    System.out.println("Tapper le numero de la carte que vous voulez utiliser ");
+                    int numeroCarte = inputNumeroCarte.nextInt();
+                    while (numeroCarte > this.getCarteJoueurMain().size() || numeroCarte < 1){
+                        System.out.println("Mauvais saisir. Veuillez resaisir le numero de la carte");
+                        numeroCarte = inputNumeroCarte.nextInt();
+                    }
+                    inputNumeroCarte.close();
+                    this.jouerCarte(this.getCarteJoueurMain().get(numeroCarte-1));
                 }
-            }
 
 
-
-
-
+                }
         }
+        this.setEstAccuse(false);
+
+
+
+
+
     }
 
-    public void commencerTour(){
 
-        if(estAccuse==true){
-            repondreAccusation();
+    public void commencerTour(){
+        if (carteJoueurMain.size()==0){
+            this.accuser();
+        }
+        else if (this.isEvilEye() == true){
+                System.out.println(" Vous êtes obligé d'accuser ");
+                int indiceJoueur = this.choisirJoueur();
+                if (Partie.getInstance().getTabjoueur().size() >= 3) {
+                    while (Partie.getInstance().getTabjoueur().get(indiceJoueur).isPersonneUtiliseEvilEye() == true) {
+                        System.out.println("Mauvais saisir. Vous ne pouvez pas accuser cette personne");
+                        indiceJoueur = this.choisirJoueur();
+                    }
+                    Partie.getInstance().getTabjoueur().get(indiceJoueur).setEstAccuse(true);
+                    Partie.getInstance().getTabjoueur().get(indiceJoueur).repondreAccusation();
+                }
+                else{
+                    Partie.getInstance().getTabjoueur().get(indiceJoueur).setEstAccuse(true);
+
+                    Partie.getInstance().getTabjoueur().get(indiceJoueur).repondreAccusation();
+
+                }
+                this.setEvilEye(false);
+                for (int i =1; i < Partie.getInstance().getTabjoueur().size(); i++){
+                    Partie.getInstance().getTabjoueur().get(i).setPersonneUtiliseEvilEye(false);
+                }
+
+
+
+
+
         }
         else{
-
-            if (carteJoueurMain.size()==0){
-                this.accuser();
-            }
-            else{
                 Scanner inputAction=new Scanner(System.in); //création d'un objet de type scanner pour récupérer les inputs de l'utilisateur
                 System.out.println("Quelle action voulez vous faire ? : \n - A pour accuser un joueur \n - H pour utiliser le Hunt effect");
                 char action=inputAction.nextLine().charAt(0);
@@ -433,37 +673,29 @@ public class Joueur {
                     this.accuser();
                 }
                 else if(action=='H'){
-                    System.out.println("Ce sont vos cartes ");
-                    for( int i = 0; i< this.carteJoueurMain.size(); i++){
-                        System.out.println(this.carteJoueurMain.get(i).getNomCarte());
-                    }
-                    boolean check = false;
                     Scanner inputNumeroCarte = new Scanner(System.in);
-                    System.out.println("Entrer le numero de la carte que vous voulez utiliser");
-                    int numCarte = inputNumeroCarte.nextInt();
-                    while (check == false){//Condition d'erreur
-                        if(numCarte >=0 && numCarte <= this.carteJoueurMain.size()){
-                            check = true;
-                        }
-                        else if (numCarte < 0 && numCarte> this.carteJoueurMain.size()){
-                            System.out.println("Mauvais saisir. Veuillez saisir un autre numero de la carte ");
-                            numCarte = inputNumeroCarte.nextInt();
-
-                        }
+                    System.out.println("Ce sont vos cartes ");
+                    for (int i=0; i < this.getCarteJoueurMain().size(); i++){
+                        System.out.println(this.getCarteJoueurMain().get(i).getNomCarte());
+                    }
+                    System.out.println("Tapper le numero de la carte que vous voulez utiliser ");
+                    int numeroCarte = inputNumeroCarte.nextInt();
+                    while (numeroCarte > this.getCarteJoueurMain().size() || numeroCarte < 1){
+                        System.out.println("Mauvais saisir. Veuillez resaisir le numero de la carte");
+                        numeroCarte = inputNumeroCarte.nextInt();
                     }
                     inputNumeroCarte.close();
-                    this.jouerCarte(this.getCarteJoueurMain().get(numCarte-1));
+                    this.jouerCarte(this.getCarteJoueurMain().get(numeroCarte-1));
+
 
                 }
             }
-        }
-        this.setTour(false);
-    }
-
-
-
-
-    public static void main (String[] args){
 
     }
+
+
+
+
+
+
 }
