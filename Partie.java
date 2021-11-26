@@ -8,10 +8,8 @@ public class Partie {
     private ArrayList<CarteRumeur> carteDiscarte;
     private static Partie instance;
 
-    public void ajouterJoueur(int nbrJoueur, int refJoueur){
-        for(int i=0;i<nbrJoueur; i++){
-            tabjoueur.add(new Joueur(refJoueur));
-        }
+    public void ajouterJoueur(Joueur joueur){
+        tabjoueur.add(joueur);
     }
 
     public ArrayList<Joueur> getTabjoueurSup() {
@@ -34,9 +32,16 @@ public class Partie {
     }
 
     private Partie(){ //constructeur de la classe Partie
-        this.tabjoueur=new ArrayList<Joueur>(); //initialisation de la collection de Joueur
+        tabjoueur=new ArrayList<Joueur>(); //initialisation de la collection de Joueur
         jeuCarte = new JeuCarte(); //initialisation de la collection de Carte -> toutes les cartes présentes dans une partie
         carteDiscarte = new ArrayList<CarteRumeur>();
+    }
+    public ArrayList<Joueur> getTabjoueur() {
+        return tabjoueur;
+    }
+
+    public void setTabjoueur(ArrayList<Joueur> tabjoueur) {
+        this.tabjoueur = tabjoueur;
     }
 
     public ArrayList<CarteRumeur> getCarteDiscarte() {
@@ -63,7 +68,7 @@ public class Partie {
             }
         }
     }
-    public int chercherJoueur(String nom){ //méthode pour rechercher le nom d'un joueur parmis ceux déjà existants
+    public Joueur chercherJoueur(String nom){ //méthode pour rechercher le nom d'un joueur parmis ceux déjà existants
         int i=0;
         boolean check = false; // la variable check permet de voir si le nom est présent dans le tableau de joueur.
         while (check == false){
@@ -79,13 +84,39 @@ public class Partie {
             }
             else{check = true;}
         }
-        return i;
+        return tabjoueur.get(i);
+    }
+    public boolean terminerTour(){
+        int compterPersonneRevelePasID =0;
+        for (int i= 0; i < this.getTabjoueur().size(); i++){
+            if (this.getTabjoueur().get(i).isIdEstRevele() == false){
+                compterPersonneRevelePasID +=1;
+            }
+        }
+        if (compterPersonneRevelePasID == 1){
+            return true;
+        }
+        else {return  false;}
+    }
+    public Joueur joueurGagnantTour(){
+        int indiceJoueurGagnant =0;
+        if (this.terminerTour()){
+            while (this.getTabjoueur().get(indiceJoueurGagnant).isIdEstRevele() == false){
+                indiceJoueurGagnant +=1;
+            }
+        }
+        System.out.println("Le joueur " + this.getTabjoueur().get(indiceJoueurGagnant).getNom()+" a gagné ce tour");
+        return this.getTabjoueur().get(indiceJoueurGagnant);
+    }
+    public void preparerNouveauTour(){
+        int i=0;
+        while (this.getTabjoueurSup().size() !=0){
+
+        }
     }
 
 
-    public ArrayList<Joueur> getTabjoueur() {
-        return tabjoueur;
-    }
+
 
 
     public static void main (String[] args){

@@ -8,8 +8,8 @@ public class Joueur {
     private ArrayList<CarteRumeur> carteJoueurMain, carteJoueurPlateau;
     private Role identite;
 
-    public Joueur(int refJoueur) { //constructeur de Joueur
-        this.refJoueur=refJoueur;
+    public Joueur(String nom) { //constructeur de Joueur
+        this.nom = nom;
         this.carteJoueurMain=new ArrayList<CarteRumeur>();
     }
 
@@ -111,13 +111,13 @@ public class Joueur {
         this.personneUtiliseEvilEye = personneUtiliseEvilEye;
     }
 
-    public int choisirJoueur(){
+    public Joueur choisirJoueur(){
         Scanner inputNom = new Scanner(System.in);
         System.out.println("Entrer un nom de la joueur  ");
         String nomJoueur = inputNom.nextLine();
         inputNom.close();
-        int indiceJoueur = Partie.getInstance().chercherJoueur(nomJoueur);
-        return indiceJoueur;
+        Joueur joueurChoisi= Partie.getInstance().chercherJoueur(nomJoueur);
+        return joueurChoisi;
     }
 
     public void choisirRole(){
@@ -179,15 +179,15 @@ public class Joueur {
         String accuser=inputAction.nextLine();
         inputAction.close();
 
-        int indice = Partie.getInstance().chercherJoueur(accuser);
-        while (Partie.getInstance().getTabjoueur().get(indice).isIdEstRevele() == true){
+        Joueur joueurAccuse = Partie.getInstance().chercherJoueur(accuser);
+        while (joueurAccuse.isIdEstRevele() == true){
             System.out.println("Cette personne est deja releve ID. Veuillez choisir autre joueur ");
-            indice = this.choisirJoueur();
+            joueurAccuse = this.choisirJoueur();
 
         }
-        Partie.getInstance().getTabjoueur().get(indice).setEstAccuse(true);
+        joueurAccuse.setEstAccuse(true);
         while (this.Accuse()){
-            Partie.getInstance().getTabjoueur().get(indice).repondreAccusation();
+            joueurAccuse.repondreAccusation();
             this.setAccuse(false);
         }
 
@@ -239,31 +239,30 @@ public class Joueur {
         }
         if (carteRumeur.getNomCarte().equals(nomCarte.DuckingStool)) {
             boolean check = false;
-            int indiceJoueur = this.choisirJoueur();
-
+            Joueur joueurChoisi = this.choisirJoueur();
             while(check == false){
                 boolean checkCarte = true;
-                for (int i =0; i < Partie.getInstance().getTabjoueur().get(indiceJoueur).getCarteJoueurPlateau().size(); i++ ){
-                    if(Partie.getInstance().getTabjoueur().get(indiceJoueur).getCarteJoueurPlateau().get(i).getNomCarte() == nomCarte.Wart){
+                for (int i =0; i < joueurChoisi.getCarteJoueurPlateau().size(); i++ ){
+                    if(joueurChoisi.getCarteJoueurPlateau().get(i).getNomCarte() == nomCarte.Wart){
                         checkCarte = false;
                     }
                 }
                 if (checkCarte == false){
                     System.out.println("Mauvais saisir. Veuillez choisir autre joueur ");
-                    indiceJoueur = this.choisirJoueur();
+                    joueurChoisi = this.choisirJoueur();
                 }
                 else{
                     check = true;
                 }
 
             }
-            Partie.getInstance().getTabjoueur().get(indiceJoueur).setTour(true);
+            joueurChoisi.setTour(true);
 
         }
         if (carteRumeur.getNomCarte().equals(nomCarte.EvilEye)){
-            int indiceJoueur  = this.choisirJoueur();
-            Partie.getInstance().getTabjoueur().get(indiceJoueur).setTour(true);
-            Partie.getInstance().getTabjoueur().get(indiceJoueur).setEvilEye(true);
+            Joueur joueurChoisi  = this.choisirJoueur();
+            joueurChoisi.setTour(true);
+            joueurChoisi.setEvilEye(true);
             this.setPersonneUtiliseEvilEye(true);
         }
         if (carteRumeur.getNomCarte().equals(nomCarte.Toad)){
@@ -282,8 +281,9 @@ public class Joueur {
             while (Partie.getInstance().getTabjoueur().get(indicePersonneAccuse).accuse == false){
                 indicePersonneAccuse++;
             }
+            Joueur joueurAccuse = Partie.getInstance().getTabjoueur().get(indicePersonneAccuse);
             System.out.println("Veuillez choisir numero de la carte ");
-            for (int j = 0; j < Partie.getInstance().getTabjoueur().get(indicePersonneAccuse).getCarteJoueurMain().size(); j++){
+            for (int j = 0; j < joueurAccuse.getCarteJoueurMain().size(); j++){
 
                 System.out.println(j+1);
             }
@@ -299,8 +299,8 @@ public class Joueur {
                 }
             }
             inputNumcarte.close();
-            this.carteJoueurMain.add(Partie.getInstance().getTabjoueur().get(indicePersonneAccuse).getCarteJoueurMain().get(numCarte-1));//ajouter une carte dans le jeu de la personne accusée
-            Partie.getInstance().getTabjoueur().get(indicePersonneAccuse).getCarteJoueurMain().remove(Partie.getInstance().getTabjoueur().get(indicePersonneAccuse).getCarteJoueurMain().get(numCarte-1));// retire la carte du jeu de la personne qui accuse
+            this.carteJoueurMain.add(joueurAccuse.getCarteJoueurMain().get(numCarte-1));//ajouter une carte dans le jeu de la personne accusée
+            joueurAccuse.getCarteJoueurMain().remove(joueurAccuse.getCarteJoueurMain().get(numCarte-1));// retire la carte du jeu de la personne qui accuse
 
         }
         if ( carteRumeur.getNomCarte().equals(nomCarte.Cauldron)){
@@ -310,9 +310,10 @@ public class Joueur {
             while (Partie.getInstance().getTabjoueur().get(indicePersonneAccuse).accuse == false){
                 indicePersonneAccuse++;
             }
-            int numCarte =(int) (Math.random()* Partie.getInstance().getTabjoueur().get(indicePersonneAccuse).getCarteJoueurMain().size());
-            Partie.getInstance().getCarteDiscarte().add(Partie.getInstance().getTabjoueur().get(indicePersonneAccuse).getCarteJoueurMain().get(numCarte));
-            Partie.getInstance().getTabjoueur().get(indicePersonneAccuse).getCarteJoueurMain().remove(Partie.getInstance().getTabjoueur().get(indicePersonneAccuse).getCarteJoueurMain().get(numCarte));// retire la carte du jeu de la personne qui accuse
+            Joueur joueurAccuse = Partie.getInstance().getTabjoueur().get(indicePersonneAccuse);
+            int numCarte =(int) (Math.random()* joueurAccuse.getCarteJoueurMain().size());
+            Partie.getInstance().getCarteDiscarte().add(joueurAccuse.getCarteJoueurMain().get(numCarte));
+            joueurAccuse.getCarteJoueurMain().remove(joueurAccuse.getCarteJoueurMain().get(numCarte));// retire la carte du jeu de la personne qui accuse
 
         }
 
@@ -357,25 +358,25 @@ public class Joueur {
                 this.setUtilisereffet(false);
             }
             else{
-                int indiceJoueur = this.choisirJoueur();
+                Joueur joueurChoisi = this.choisirJoueur();
                 boolean verifierID;
                 while(check == false){
                     boolean checkCarte = true;
-                    for (int i =0; i < Partie.getInstance().getTabjoueur().get(indiceJoueur).getCarteJoueurPlateau().size(); i++ ){
-                        if(Partie.getInstance().getTabjoueur().get(indiceJoueur).getCarteJoueurPlateau().get(i).getNomCarte() == nomCarte.BroomStick){
+                    for (int i =0; i < joueurChoisi.getCarteJoueurPlateau().size(); i++ ){
+                        if(joueurChoisi.getCarteJoueurPlateau().get(i).getNomCarte() == nomCarte.BroomStick){
                             checkCarte = false;
                         }
                     }
                     if (checkCarte == false){
                         System.out.println("Mauvais saisir. Veuillez choisir autre joueur ");
-                        indiceJoueur = this.choisirJoueur();
+                        joueurChoisi = this.choisirJoueur();
                     }
                     else{
                         check = true;
                     }
 
                 }
-                verifierID = Partie.getInstance().getTabjoueur().get(indiceJoueur).revelerId();
+                verifierID = joueurChoisi.revelerId();
                 if (verifierID){
                     this.setPoints(this.getPoints()+2);
                     this.setTour(true);
@@ -383,7 +384,7 @@ public class Joueur {
                 }
                 else{
                     this.setPoints(this.getPoints()-2);
-                    Partie.getInstance().getTabjoueur().get(indiceJoueur).setTour(true);
+                    joueurChoisi.setTour(true);
                 }
 
 
@@ -396,9 +397,9 @@ public class Joueur {
                 System.out.println("Vous ne pouvez pas utiliser  cette carte ");
                 this.setUtilisereffet(false);
             }
-            int indiceJoueur = this.choisirJoueur();
-            Partie.getInstance().getTabjoueur().get(indiceJoueur).setTour(true);
-            System.out.println("Son ID est "+ Partie.getInstance().getTabjoueur().get(indiceJoueur).getIdentite() );
+            Joueur joueurChoisi = this.choisirJoueur();
+            joueurChoisi.setTour(true);
+            System.out.println("Son ID est "+ joueurChoisi.getIdentite() );
 
         }
         if (carteRumeur.getNomCarte().equals(nomCarte.PointedHat)){
@@ -417,38 +418,38 @@ public class Joueur {
                 inputNumeroCarte.close();
                 this.getCarteJoueurMain().add(this.getCarteJoueurPlateau().get(numcarte));
                 this.getCarteJoueurPlateau().remove(this.getCarteJoueurPlateau().get(numcarte));
-                int indiceJoueur = this.choisirJoueur();
-                Partie.getInstance().getTabjoueur().get(indiceJoueur).setTour(true);
+                Joueur joueurChoisi = this.choisirJoueur();
+                joueurChoisi.setTour(true);
 
 
             }
         }
         if (carteRumeur.getNomCarte().equals(nomCarte.Wart)){
-            int indiceJoueur = this.choisirJoueur();
-            Partie.getInstance().getTabjoueur().get(indiceJoueur).setTour(true);
+            Joueur joueurChoisi = this.choisirJoueur();
+            joueurChoisi.setTour(true);
         }
         if (carteRumeur.getNomCarte().equals(nomCarte.BroomStick)){
-            int indiceJoueur = this.choisirJoueur();
-            Partie.getInstance().getTabjoueur().get(indiceJoueur).setTour(true);
+            Joueur joueurChoisi = this.choisirJoueur();
+            joueurChoisi.setTour(true);
         }
         if (carteRumeur.getNomCarte().equals(nomCarte.HookedNose)){
-            int indiceJoueur = this.choisirJoueur();
-            Partie.getInstance().getTabjoueur().get(indiceJoueur).setTour(true);
-            int numCarte =(int) (Math.random()* Partie.getInstance().getTabjoueur().get(indiceJoueur).getCarteJoueurMain().size());
-            this.carteJoueurMain.add(Partie.getInstance().getTabjoueur().get(indiceJoueur).getCarteJoueurMain().get(numCarte));
-            Partie.getInstance().getTabjoueur().get(indiceJoueur).getCarteJoueurMain().remove(Partie.getInstance().getTabjoueur().get(indiceJoueur).getCarteJoueurMain().get(numCarte));// retire la carte du jeu de la personne qui accuse
+            Joueur joueurChoisi = this.choisirJoueur();
+            joueurChoisi.setTour(true);
+            int numCarte =(int) (Math.random()* joueurChoisi.getCarteJoueurMain().size());
+            this.carteJoueurMain.add(joueurChoisi.getCarteJoueurMain().get(numCarte));
+            joueurChoisi.getCarteJoueurMain().remove(joueurChoisi.getCarteJoueurMain().get(numCarte));// retire la carte du jeu de la personne qui accuse
 
         }
         if (carteRumeur.getNomCarte().equals(nomCarte.EvilEye)){
-            int indiceJoueur  = this.choisirJoueur();
-            Partie.getInstance().getTabjoueur().get(indiceJoueur).setTour(true);
-            Partie.getInstance().getTabjoueur().get(indiceJoueur).setEvilEye(true);
+            Joueur joueurChoisi = this.choisirJoueur();
+            joueurChoisi.setTour(true);
+            joueurChoisi.setEvilEye(true);
         }
         if (carteRumeur.getNomCarte().equals(nomCarte.PetNewt)){
             boolean check = false;
-            int indiceJoueur = this.choisirJoueur();
+            Joueur joueurChoisi = this.choisirJoueur();
             System.out.println(" Veuillez choisir la numero de la carte");
-            for (int i=0; i < Partie.getInstance().getTabjoueur().get(indiceJoueur).getCarteJoueurPlateau().size();i++){
+            for (int i=0; i < joueurChoisi.getCarteJoueurPlateau().size();i++){
                 System.out.println(i+1);
             }
             Scanner inputNumcarte = new Scanner(System.in);
@@ -463,41 +464,41 @@ public class Joueur {
                 }
             }
             inputNumcarte.close();
-            this.carteJoueurMain.add(Partie.getInstance().getTabjoueur().get(indiceJoueur).getCarteJoueurPlateau().get(numCarte-1));
-            Partie.getInstance().getTabjoueur().get(indiceJoueur).getCarteJoueurPlateau().remove(Partie.getInstance().getTabjoueur().get(indiceJoueur).getCarteJoueurPlateau().get(numCarte-1));
-            Partie.getInstance().getTabjoueur().get(indiceJoueur).setTour(true);
+            this.carteJoueurMain.add(joueurChoisi.getCarteJoueurPlateau().get(numCarte-1));
+            joueurChoisi.getCarteJoueurPlateau().remove(joueurChoisi.getCarteJoueurPlateau().get(numCarte-1));
+            joueurChoisi.setTour(true);
 
         }
         if (carteRumeur.getNomCarte().equals(nomCarte.DuckingStool)){
             boolean check = false;
-            int indiceJoueur = this.choisirJoueur();
+            Joueur joueurChoisi = this.choisirJoueur();
 
             while(check == false){
                 boolean checkCarte = true;
-                for (int i =0; i < Partie.getInstance().getTabjoueur().get(indiceJoueur).getCarteJoueurPlateau().size(); i++ ){
-                    if(Partie.getInstance().getTabjoueur().get(indiceJoueur).getCarteJoueurPlateau().get(i).getNomCarte() == nomCarte.Wart){
+                for (int i =0; i < joueurChoisi.getCarteJoueurPlateau().size(); i++ ){
+                    if(joueurChoisi.getCarteJoueurPlateau().get(i).getNomCarte() == nomCarte.Wart){
                         checkCarte = false;
                     }
                 }
                 if (checkCarte == false){
                     System.out.println("Mauvais saisir. Veuillez choisir autre joueur ");
-                    indiceJoueur = this.choisirJoueur();
+                    joueurChoisi = this.choisirJoueur();
                 }
                 else{
                     check = true;
                 }
 
             }
-            int choice = Partie.getInstance().getTabjoueur().get(indiceJoueur).repondreDuckingStool();
+            int choice = joueurChoisi.repondreDuckingStool();
             boolean verifierID;
             if (choice == 1){
-                verifierID = Partie.getInstance().getTabjoueur().get(indiceJoueur).revelerId();
+                verifierID = joueurChoisi.revelerId();
                 if (verifierID){
                     this.setPoints(this.getPoints()+1);
                     this.setTour(true);
                 }
                 else{
-                    Partie.getInstance().getTabjoueur().get(indiceJoueur).setTour(true);
+                    joueurChoisi.setTour(true);
                     this.setPoints(this.getPoints()-1);
                 }
             }
@@ -506,11 +507,11 @@ public class Joueur {
             boolean verifierID;
             verifierID = this.revelerId();
             if (verifierID){
-                int indiceJoueur = this.choisirJoueur();
-                Partie.getInstance().getTabjoueur().get(indiceJoueur).setTour(true);
+                Joueur joueurChoisi = this.choisirJoueur();
+                joueurChoisi.setTour(true);
             }
             else{
-                int indice = Partie.getInstance().chercherJoueur(this.getNom());
+                int indice = Partie.getInstance().getTabjoueur().indexOf(this);
                 if (indice ==0){
                     int size = Partie.getInstance().getTabjoueur().size();
                     Partie.getInstance().getTabjoueur().get(size-1).setTour(true);
@@ -525,11 +526,11 @@ public class Joueur {
             boolean verifierID;
             verifierID = this.revelerId();
             if (verifierID){
-                int indiceJoueur = this.choisirJoueur();
-                Partie.getInstance().getTabjoueur().get(indiceJoueur).setTour(true);
+                Joueur joueurChoisi = this.choisirJoueur();
+                joueurChoisi.setTour(true);
             }
             else{
-                int indice = Partie.getInstance().chercherJoueur(this.getNom());
+                int indice = Partie.getInstance().getTabjoueur().indexOf(this);
                 if (indice ==0){
                     int size = Partie.getInstance().getTabjoueur().size();
                     Partie.getInstance().getTabjoueur().get(size-1).setTour(true);
@@ -561,6 +562,9 @@ public class Joueur {
                 inputNumeroCarte.close();
                 this.getCarteJoueurMain().add(Partie.getInstance().getCarteDiscarte().get(numeroCarte));
                 Partie.getInstance().getCarteDiscarte().remove(Partie.getInstance().getCarteDiscarte().get(numeroCarte));
+
+                Partie.getInstance().getCarteDiscarte().add(carteRumeur);
+                this.getCarteJoueurPlateau().remove(carteRumeur);
 
 
 
@@ -632,19 +636,19 @@ public class Joueur {
         }
         else if (this.isEvilEye() == true){
                 System.out.println(" Vous êtes obligé d'accuser ");
-                int indiceJoueur = this.choisirJoueur();
+                Joueur joueurChoisi = this.choisirJoueur();
                 if (Partie.getInstance().getTabjoueur().size() >= 3) {
-                    while (Partie.getInstance().getTabjoueur().get(indiceJoueur).isPersonneUtiliseEvilEye() == true) {
+                    while (joueurChoisi.isPersonneUtiliseEvilEye() == true) {
                         System.out.println("Mauvais saisir. Vous ne pouvez pas accuser cette personne");
-                        indiceJoueur = this.choisirJoueur();
+                        joueurChoisi = this.choisirJoueur();
                     }
-                    Partie.getInstance().getTabjoueur().get(indiceJoueur).setEstAccuse(true);
-                    Partie.getInstance().getTabjoueur().get(indiceJoueur).repondreAccusation();
+                    joueurChoisi.setEstAccuse(true);
+                    joueurChoisi.repondreAccusation();
                 }
                 else{
-                    Partie.getInstance().getTabjoueur().get(indiceJoueur).setEstAccuse(true);
+                    joueurChoisi.setEstAccuse(true);
 
-                    Partie.getInstance().getTabjoueur().get(indiceJoueur).repondreAccusation();
+                    joueurChoisi.repondreAccusation();
 
                 }
                 this.setEvilEye(false);
