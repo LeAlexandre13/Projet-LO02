@@ -1,6 +1,9 @@
+import javax.management.relation.Role;
 import java.util.*;
 
 public class Partie {
+
+
 
     private int nbrJoueur, round;
     private ArrayList<Joueur> tabjoueur, tabjoueurSup;
@@ -25,16 +28,17 @@ public class Partie {
     }
 
     public static Partie getInstance(){ //Méthode pour le patron de conception Singleton
-        if(instance==null){
+        if(instance == null){
             instance=new Partie();
         }
         return instance;
     }
 
     private Partie(){ //constructeur de la classe Partie
-        tabjoueur=new ArrayList<Joueur>(); //initialisation de la collection de Joueur
+        tabjoueur= new ArrayList<Joueur>(); //initialisation de la collection de Joueur
         jeuCarte = new JeuCarte(); //initialisation de la collection de Carte -> toutes les cartes présentes dans une partie
         carteDiscarte = new ArrayList<CarteRumeur>();
+        tabjoueurSup = new ArrayList<Joueur>();
     }
     public ArrayList<Joueur> getTabjoueur() {
         return tabjoueur;
@@ -72,10 +76,10 @@ public class Partie {
         int i=0;
         boolean check = false; // la variable check permet de voir si le nom est présent dans le tableau de joueur.
         while (check == false){
-            while(!tabjoueur.get(i).getNom().equals(nom) && i < tabjoueur.size()){ //Tant qu'on ne trouve pas le nom du joueur on incrémente i
+            while(!this.getTabjoueur().get(i).getNom().equals(nom) && i < this.getTabjoueur().size()){ //Tant qu'on ne trouve pas le nom du joueur on incrémente i
                 i++;
             }
-            if (i == tabjoueur.size()){ //Si le prénom n'est pas présent dans le tableau de Joueur, on demnde à l'utilisateur de ressaisir le nom.
+            if (i == this.getTabjoueur().size()){ //Si le prénom n'est pas présent dans le tableau de Joueur, on demnde à l'utilisateur de ressaisir le nom.
                 Scanner scanner = new Scanner(System.in);
                 System.out.println("Le nom est faux. Veuillez resaisir le nom ");
                 String nom2 = scanner.nextLine();
@@ -84,7 +88,7 @@ public class Partie {
             }
             else{check = true;}
         }
-        return tabjoueur.get(i);
+        return this.getTabjoueur().get(i);
     }
     public boolean terminerTour(){
         int compterPersonneRevelePasID =0;
@@ -100,26 +104,102 @@ public class Partie {
     }
     public Joueur joueurGagnantTour(){
         int indiceJoueurGagnant =0;
-        if (this.terminerTour()){
-            while (this.getTabjoueur().get(indiceJoueurGagnant).isIdEstRevele() == false){
+        while (this.getTabjoueur().get(indiceJoueurGagnant).isIdEstRevele() == false){
                 indiceJoueurGagnant +=1;
-            }
         }
-        System.out.println("Le joueur " + this.getTabjoueur().get(indiceJoueurGagnant).getNom()+" a gagné ce tour");
+        Joueur joueurGagnant = this.getTabjoueur().get(indiceJoueurGagnant);
+        if (joueurGagnant.getRole().equals(Role.VILLAGER)){
+            joueurGagnant.setPoints(joueurGagnant.getPoints()+1);
+        }
+        else{
+            joueurGagnant.setPoints(joueurGagnant.getPoints()+2);
+
+        }
+
         return this.getTabjoueur().get(indiceJoueurGagnant);
+    }
+    public void annoncerLeGagnantDuTour(){
+        Joueur joueurGagnant = this.joueurGagnantTour();
+        System.out.println(" Le joueur " + joueurGagnant.getNom()+ " a gagné ce tour ");
     }
     public void preparerNouveauTour(){
         int i=0;
         while (this.getTabjoueurSup().size() !=0){
-
+            this.getTabjoueur().add(this.getTabjoueurSup().get(i));
+            this.getTabjoueurSup().remove(this.getTabjoueurSup().get(i));
         }
+        for (int j =0; j< this.getTabjoueur().size(); i++){
+            this.getTabjoueur().get(j).setTour(false);
+            this.getTabjoueur().get(j).getCarteJoueurMain().clear();
+            this.getTabjoueur().get(j).getCarteJoueurPlateau().clear();
+        }
+
+        Joueur joueurGagnant = this.joueurGagnantTour();
+        joueurGagnant.setTour(true);
+        jeuCarte = new JeuCarte();
     }
+    public boolean terminerJeu(){
+        boolean check = true;
+        for (int i = 0; i < this.getTabjoueur().size(); i++){
+            if (this.getTabjoueur().get(i).getPoints() < 5 ){
+                check = false;
+            }
+        }
+        if (check){
+            return true;
+        }
+        else{return false;}
+    }
+    public Joueur joueurGagnantJeu(){
+        int pointJoueurGagnant= this.getTabjoueur().get(0).getPoints();
+        int indiceJoueurGagnant=0;
+        for (int i =1; i < this.getTabjoueur().size(); i++){
+            if (this.getTabjoueur().get(i).getPoints() > pointJoueurGagnant){
+                pointJoueurGagnant = this.getTabjoueur().get(i).getPoints();
+                indiceJoueurGagnant = i;
+            }
+        }
+        return this.getTabjoueur().get(indiceJoueurGagnant);
+    }
+    public void annonceLeGagnantJeu(){
+        Joueur joueurGagnantJeu = this.joueurGagnantJeu();
+        System.out.println(" Le joueur " + joueurGagnantJeu.getNom()+ " a gagné  ");
 
-
-
-
-
+    }
+    public void commencerJeu(){
+        int i =0;
+        while (this.getTabjoueur().get(i).isTour() == false){
+            i += 1;
+        }
+        this.getTabjoueur().get(i).commencerTour();
+    }
     public static void main (String[] args){
+        Partie witchHunt = Partie.getInstance();
+        Role villager = 
+
+        Joueur Dung = new Joueur("Dung", Role.VILLAGER);
+        Joueur Tri = new Joueur("Tri", Role.WITCH) ;
+        System.out.println(Dung.getRole());
+//
+//        witchHunt.ajouterJoueur(Dung);
+//        witchHunt.ajouterJoueur(Tri);
+//        Dung.setTour(true);
+//        witchHunt.distribuerCartesRumours();
+////        while (witchHunt.terminerJeu() == false){
+////
+////            while (witchHunt.terminerTour() == false){
+////                witchHunt.commencerJeu();
+////            }
+////            witchHunt.annoncerLeGagnantDuTour();
+////            witchHunt.preparerNouveauTour();
+////            witchHunt.distribuerCartesRumours();
+////        }
+//        witchHunt.annonceLeGagnantJeu();
+//        //String accuse = "Dung";
+//        //Joueur Long = witchHunt.chercherJoueur(accuse);
+//        //System.out.println(Long.getNom());
+//        System.out.println(Dung.getRole());
+
 
     }
 }
