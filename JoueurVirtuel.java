@@ -1,6 +1,5 @@
 public class JoueurVirtuel extends Joueur implements Strategie  {
 
-    private boolean estVirtuel;
 
     public JoueurVirtuel(int refJoueur){ //constructeur de JoueurVirtuelle
         super(refJoueur);
@@ -10,6 +9,7 @@ public class JoueurVirtuel extends Joueur implements Strategie  {
     public void aggressif(){
         if(this.estVirtuel) {
             while (tour == true) {
+                System.out.println("Le joueur virtuel"+ this.refJoueur + " accuse un autre Joueur");
                 this.accuser();
             }
         }
@@ -19,8 +19,11 @@ public class JoueurVirtuel extends Joueur implements Strategie  {
         if(this.estVirtuel) {
             int stratAlea = (int) (Math.random() * 1); //donne 0 ou 1 de manière aléatoire
             if (stratAlea == 0) {
+                System.out.println("Le joueur virtuel"+ this.refJoueur + " accuse un autre Joueur");
                 this.accuser();
-            } else {
+            }
+            else {
+                System.out.println("Le joueur virtuel"+ this.refJoueur + " utilise l'effet Hunt");
                 int carteAlea = (int) (Math.random() * carteJoueurMain.size()); //nombre aléatoire entre 0 et le nombre total de carte présentes dans la main du joueur
                 this.efffetHunt(carteJoueurMain.get(carteAlea));
             }

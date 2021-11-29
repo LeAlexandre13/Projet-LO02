@@ -2,16 +2,16 @@ import java.util.*;
 
 
 public class CarteRumeur  {
-    private nomCarte nomCarte;
-    public CarteRumeur(nomCarte nomCarte){
+    private NomCarte nomCarte;
+    public CarteRumeur(NomCarte nomCarte){
         this.nomCarte = nomCarte;
     }
 
-    public nomCarte getNomCarte() {
+    public NomCarte getNomCarte() {
         return nomCarte;
     }
 
-    public void setNomCarte(nomCarte nomCarte) {
+    public void setNomCarte(NomCarte nomCarte) {
         this.nomCarte = nomCarte;
     }
 }

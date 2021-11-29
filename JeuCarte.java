@@ -2,11 +2,13 @@ import java.util.LinkedList;
 import java.util.*;
 
 public class JeuCarte {
+
     private LinkedList<CarteRumeur> deckCarteRumeurs;
     public static final int nbrCarte = 12;
+
     public JeuCarte(){
         deckCarteRumeurs = new LinkedList<CarteRumeur>();
-        nomCarte[] nomCartes = nomCarte.values();
+        NomCarte[] nomCartes = NomCarte.values();
         for (int i = 0; i < nomCartes.length; i++){
             CarteRumeur carteRumeur = new CarteRumeur(nomCartes[i]);
             deckCarteRumeurs.add(carteRumeur);
@@ -26,6 +28,7 @@ public class JeuCarte {
                 "deckCarteRumeurs=" + deckCarteRumeurs +
                 '}';
     }
+
     public CarteRumeur distribuerUneCarte(){
         return deckCarteRumeurs.poll();
     }
