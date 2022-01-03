@@ -1,5 +1,7 @@
+package Modele;
+
 public enum NomCarte {
-    AngryMob,
+	AngryMob,
     TheInquisition,
     PointedHat,
     HookedNose,

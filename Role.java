@@ -1,4 +1,6 @@
+package Modele;
+
 public enum Role {
-    Witch,
+	Witch,
     Villager
 }

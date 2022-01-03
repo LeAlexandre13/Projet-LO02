@@ -1,19 +1,24 @@
+package Modele;
 import java.util.*;
 
-public class Partie {
+public class Partie extends Observable{
 
-    private int nbrJoueur, round;
+    private static int nbrJoueurReel;
+	private static int nbrJoueurVirtuel;
+	private int round;
     private static ArrayList<Joueur> tabjoueur, tabjoueurSup;
     private JeuCarte jeuCarte;
     private ArrayList<CarteRumeur> carteDiscarte;
     private static Partie instance;
 
-    public static void ajouterJoueurReels(int refJoueur){
-        tabjoueur.add(new Joueur(refJoueur));
+    
+
+    public int getRound() {
+        return round;
     }
 
-    public static void ajouterJoueurVirtuels(int refJoueur){
-        tabjoueur.add(new JoueurVirtuel(refJoueur));
+    public void setRound(int round) {
+        this.round = round;
     }
 
     public ArrayList<Joueur> getTabjoueurSup() {
@@ -24,20 +29,20 @@ public class Partie {
         this.tabjoueurSup = tabjoueurSup;
     }
 
-    public void supprimerJoueur(Joueur joueur){
+    public void supprimerJoueur(Joueur joueur) {
         tabjoueur.remove(joueur);
     }
 
-    public static Partie getInstance(){ //M√©thode pour le patron de conception Singleton
-        if(instance==null){
-            instance=new Partie();
+    public static Partie getInstance() { //MÈthode pour le patron de conception Singleton
+        if (instance == null) {
+            instance = new Partie();
         }
         return instance;
     }
 
-    private Partie(){ //constructeur de la classe Partie
-        this.tabjoueur=new ArrayList<Joueur>(); //initialisation de la collection de Joueur
-        jeuCarte = new JeuCarte(); //initialisation de la collection de Carte -> toutes les cartes pr√©sentes dans une partie
+    private Partie() { //constructeur de la classe Partie
+        this.tabjoueur = new ArrayList<Joueur>(); //initialisation de la collection de Joueur
+        jeuCarte = new JeuCarte(); //initialisation de la collection de Carte -> toutes les cartes prÈsentes dans une partie
         carteDiscarte = new ArrayList<CarteRumeur>();
         tabjoueurSup = new ArrayList<Joueur>();
 
@@ -51,16 +56,15 @@ public class Partie {
         this.carteDiscarte = carteDiscarte;
     }
 
-    public void distribuerCartesRumours(){
+    public void distribuerCartesRumours() {
         jeuCarte.melanger();
-        while (jeuCarte.estVide() == false){
+        while (jeuCarte.estVide() == false) {
             Iterator<Joueur> iterator = tabjoueur.iterator();
-            if (tabjoueur.size() == 5 && jeuCarte.getDeckCarteRumeurs().size() == 2 ){
+            if (tabjoueur.size() == 5 && jeuCarte.getDeckCarteRumeurs().size() == 2) {
                 CarteRumeur carteRumeur = jeuCarte.distribuerUneCarte();
                 carteDiscarte.add(carteRumeur);
-            }
-            else{
-                while (iterator.hasNext()){
+            } else {
+                while (iterator.hasNext()) {
                     CarteRumeur carteRumeur = jeuCarte.distribuerUneCarte();
                     iterator.next().ramasserCarte(carteRumeur);
                 }
@@ -68,21 +72,20 @@ public class Partie {
         }
     }
 
-    public Joueur chercherJoueur(String nom){ //m√©thode pour rechercher le nom d'un joueur parmis ceux d√©j√† existants
-        int indiceJoueur =0;
-        boolean check = false; // la variable check permet de voir si le nom est pr√©sent dans le tableau de joueur.
-        while (check == false){
-            indiceJoueur =0;
-            while (indiceJoueur < tabjoueur.size() && !tabjoueur.get(indiceJoueur).getNom().equals(nom)){
+    public Joueur chercherJoueur(String nom) { //mÈthode pour rechercher le nom d'un joueur parmis ceux dÈj‡ existants
+        int indiceJoueur = 0;
+        boolean check = false; // la variable check permet de voir si le nom est prÈsent dans le tableau de joueur.
+        while (check == false) {
+            indiceJoueur = 0;
+            while (indiceJoueur < tabjoueur.size() && !tabjoueur.get(indiceJoueur).getNom().equals(nom)) {
                 indiceJoueur++;
             }
-            if (indiceJoueur == tabjoueur.size()){
+            if (indiceJoueur == tabjoueur.size()) {
                 check = false;
-            }
-            else{
+            } else {
                 check = true;
             }
-            if (!check){ //Si le pr√©nom n'est pas pr√©sent dans le tableau de Joueur, on demnde √† l'utilisateur de ressaisir le nom.
+            if (!check) { //Si le prÈnom n'est pas prÈsent dans le tableau de Joueur, on demnde ‡ l'utilisateur de ressaisir le nom.
                 Scanner scanner = new Scanner(System.in);
                 System.out.println("  nom est faux. Veuillez resaisir le nom ");
                 nom = scanner.nextLine();
@@ -98,56 +101,56 @@ public class Partie {
         return tabjoueur;
     }
 
-    public void commencerJeu(){
-        int i =0;
-        while (this.getTabjoueur().get(i).isTour() == false){
+    public void commencerJeu() {
+        int i = 0;
+        while (this.getTabjoueur().get(i).isTour() == false) {
             i += 1;
         }
-        System.out.println("C'est le tour du joueur "+ this.getTabjoueur().get(i).getNom());
+        System.out.println("C'est le tour du joueur " + this.getTabjoueur().get(i).getNom());
         this.getTabjoueur().get(i).commencerTour();
     }
 
-    public boolean terminerTour(){
-        int compterPersonneRevelePasID =0;
-        for (int i= 0; i < this.getTabjoueur().size(); i++){
-            if (this.getTabjoueur().get(i).isIdEstRevele() == false){
-                compterPersonneRevelePasID +=1;
+    public boolean terminerTour() {
+        int compterPersonneRevelePasID = 0;
+        for (int i = 0; i < this.getTabjoueur().size(); i++) {
+            if (this.getTabjoueur().get(i).isIdEstRevele() == false) {
+                compterPersonneRevelePasID += 1;
             }
         }
-        if (compterPersonneRevelePasID == 1){
+        if (compterPersonneRevelePasID == 1) {
             return true;
+        } else {
+            return false;
         }
-        else {return  false;}
     }
 
-    public Joueur joueurGagnantTour(){
-        int indiceJoueurGagnant =0;
-        while (this.getTabjoueur().get(indiceJoueurGagnant).isIdEstRevele() == true){
+    public Joueur joueurGagnantTour() {
+        int indiceJoueurGagnant = 0;
+        while (this.getTabjoueur().get(indiceJoueurGagnant).isIdEstRevele() == true) {
             indiceJoueurGagnant = indiceJoueurGagnant + 1;
         }
         Joueur joueurGagnant = this.getTabjoueur().get(indiceJoueurGagnant);
-        if (joueurGagnant.getIdentite().equals(Role.Villager)){
-            joueurGagnant.setPoints(joueurGagnant.getPoints()+1);
-        }
-        else{
-            joueurGagnant.setPoints(joueurGagnant.getPoints()+2);
+        if (joueurGagnant.getIdentite().equals(Role.Villager)) {
+            joueurGagnant.setPoints(joueurGagnant.getPoints() + 1);
+        } else {
+            joueurGagnant.setPoints(joueurGagnant.getPoints() + 2);
         }
 
         return this.getTabjoueur().get(indiceJoueurGagnant);
     }
 
-    public void annoncerLeGagnantDuTour(){
+    public void annoncerLeGagnantDuTour() {
         Joueur joueurGagnant = this.joueurGagnantTour();
-        System.out.println(" Le joueur " + joueurGagnant.getNom()+ " a gagn√© ce tour ");
+        System.out.println(" Le joueur " + joueurGagnant.getNom() + " a gagnÈ ce tour ");
     }
 
-    public void preparerNouveauTour(){
-        int i=0;
-        while (this.getTabjoueurSup().size() !=0){
+    public void preparerNouveauTour() {
+        int i = 0;
+        while (this.getTabjoueurSup().size() != 0) {
             this.getTabjoueur().add(this.getTabjoueurSup().get(i));
             this.getTabjoueurSup().remove(this.getTabjoueurSup().get(i));
         }
-        for (int j =0; j< this.getTabjoueur().size(); i++){
+        for (int j = 0; j < this.getTabjoueur().size(); i++) {
             this.getTabjoueur().get(j).setTour(false);
             this.getTabjoueur().get(j).getCarteJoueurMain().clear();
             this.getTabjoueur().get(j).getCarteJoueurPlateau().clear();
@@ -158,24 +161,25 @@ public class Partie {
         JeuCarte jeuCarte = new JeuCarte();
     }
 
-    public boolean terminerJeu(){
+    public boolean terminerJeu() {
         boolean check = true;
-        for (int i = 0; i < this.getTabjoueur().size(); i++){
-            if (this.getTabjoueur().get(i).getPoints() < 5 ){
+        for (int i = 0; i < this.getTabjoueur().size(); i++) {
+            if (this.getTabjoueur().get(i).getPoints() < 5) {
                 check = false;
             }
         }
-        if (check){
+        if (check) {
             return true;
+        } else {
+            return false;
         }
-        else{return false;}
     }
 
-    public Joueur joueurGagnantJeu(){
-        int pointJoueurGagnant= this.getTabjoueur().get(0).getPoints();
-        int indiceJoueurGagnant=0;
-        for (int i =1; i < this.getTabjoueur().size(); i++){
-            if (this.getTabjoueur().get(i).getPoints() > pointJoueurGagnant){
+    public Joueur joueurGagnantJeu() {
+        int pointJoueurGagnant = this.getTabjoueur().get(0).getPoints();
+        int indiceJoueurGagnant = 0;
+        for (int i = 1; i < this.getTabjoueur().size(); i++) {
+            if (this.getTabjoueur().get(i).getPoints() > pointJoueurGagnant) {
                 pointJoueurGagnant = this.getTabjoueur().get(i).getPoints();
                 indiceJoueurGagnant = i;
             }
@@ -185,120 +189,123 @@ public class Partie {
 
     public void annonceLeGagnantJeu() {
         Joueur joueurGagnantJeu = this.joueurGagnantJeu();
-        System.out.println(" Le joueur " + joueurGagnantJeu.getNom() + " a gagn√©  ");
+        System.out.println(" Le joueur " + joueurGagnantJeu.getNom() + " a gagnÈ  ");
+    }
+    public int choisirNombreJoueurReel() {
+    	System.out.println("Veuillez saisir le nombre de joueur reel , maximum 6 et minimum 1 ");
+    	Scanner inputNbrJoueurReel = new Scanner(System.in);
+    	nbrJoueurReel = inputNbrJoueurReel.nextInt();
+    	while (nbrJoueurReel<1 || nbrJoueurReel > 6) {
+    		System.out.println("Erreur. Veuillez resaisir le nombre de joueur reel ");
+    		nbrJoueurReel = inputNbrJoueurReel.nextInt();
+    	}
+    	return nbrJoueurReel;
+    }
+    public int choisirNombreJoueurVirtuel() {
+    	System.out.println("Veuillez saisir le nombre de joueur virtuel, maximum 6 et minimum 0 ");
+    	Scanner inputNbrJoueurVirtuel = new Scanner(System.in);
+    	nbrJoueurVirtuel = inputNbrJoueurVirtuel.nextInt();
+    	while (nbrJoueurVirtuel < 1 || nbrJoueurVirtuel > 6) {
+    		System.out.println("Erreur. Veuillez resaisir le nombre de joueur virtuel ");
+    		nbrJoueurReel = inputNbrJoueurVirtuel.nextInt();
+    	}
+    	return nbrJoueurVirtuel;
+    }
+    public void ajouterJoueur(int nbrJoueurVirtuel, int nbrJoueurReel) {
+    	if (nbrJoueurVirtuel + nbrJoueurReel > 6) {
+    		System.out.println("Erreur. Parce que le nombre de joueurs est trop grand , nous allons diminuer le nombre de joueurs virtuels");
+    		nbrJoueurVirtuel = 6 - nbrJoueurReel;
+    	}
+    	else if (nbrJoueurVirtuel + nbrJoueurReel < 3) {
+    		System.out.println("Erreur. Parce que le nombre de jouers est trop petit, nous allons augumenter le nombre de joueurs virtuels ");
+    		nbrJoueurVirtuel = 3- nbrJoueurReel;
+    	}
+    	for (int i =0; i < nbrJoueurReel; i++) {
+    		Joueur joueur = new Joueur();
+    		Partie.getInstance().getTabjoueur().add(joueur);
+    		
+    	}
+    	for (int j =0; j < nbrJoueurVirtuel; j++) {
+    		JoueurVirtuel joueurVirtuel = new JoueurVirtuel();
+    		Partie.getInstance().getTabjoueur().add(joueurVirtuel);
+    		
+    	}
+    }
+    public void choisirNom() {
+    	Partie partie = Partie.getInstance();
+    	for (int i = 0; i < partie.getTabjoueur().size(); i++) {
+    		Scanner inputNom = new Scanner(System.in);
+    		System.out.println("Entrer le nom du joueur no " + (i+1));
+    		String nom = inputNom.nextLine();
+    		partie.getTabjoueur().get(i).setNom(nom);
+    	}
     }
 
 
-    public static void main (String[] args) {
+    public static void main(String[] args) {
 
-        Partie witchHunt = Partie.getInstance(); //cr√©e une partie
+        Partie witchHunt = Partie.getInstance(); //crÈe une partie
+        nbrJoueurVirtuel = witchHunt.choisirNombreJoueurVirtuel();
+        nbrJoueurReel = witchHunt.choisirNombreJoueurReel();
+        witchHunt.ajouterJoueur(nbrJoueurVirtuel, nbrJoueurReel);
+        witchHunt.choisirNom();
 
-        //Etape pour ajouter des joueurs r√©els
-        Scanner inputNbJR = new Scanner(System.in);
-        System.out.println("Nombre de joueurs r√©els");
-        int nbJoueurR = inputNbJR.nextInt();
+        witchHunt.setRound(1);
 
-        for (int i = 0; i < nbJoueurR; i++) {
-            ajouterJoueurReels(i);
-            Scanner inputNom = new Scanner(System.in);
-            System.out.println("Saisir un nom pour le joueur " + i);
-            String nomJoueurReel = inputNom.nextLine();
-            tabjoueur.get(i).nom = nomJoueurReel;
+        while (witchHunt.terminerJeu() == false) { //tant qu'un joueur n'a pas obtenu au moins 5 points
 
-        }
-        //fin ajout joueurs r√©els
-
-        //Etape pour ajouter des joueurs virtuels
-        Scanner inputNbJV = new Scanner(System.in);
-        System.out.println("Nombre de joueurs virtuels");
-        int nbJoueurV = inputNbJV.nextInt();
-
-        int joueurRestant = 6 - nbJoueurR;
-
-        while (nbJoueurV + nbJoueurR > 6) { //condition d'erreur pour le nb de joueur
-            System.out.println("Nombre de Joueur trop grands. Veuillez saisir un nombre √©gal √† " + joueurRestant);
-            nbJoueurV = inputNbJV.nextInt();
-        }
-
-        for (int j = nbJoueurR; j < nbJoueurV + nbJoueurR; j++) {
-            ajouterJoueurVirtuels(j);
-            Scanner inputNomV = new Scanner(System.in);
-            System.out.println("Saisir un nom pour le joueur " + j);
-            String nomJoueurVirtuel = inputNomV.nextLine();
-            tabjoueur.get(j).nom = nomJoueurVirtuel;
-        }
-        //fin ajout joueurs virtuels
-
-        int refJoueur = 0;
-        witchHunt.round = 1;
-
-        while (witchHunt.getTabjoueur().get(refJoueur).getPoints() < 5) { //tant qu'un joueur n'a pas obtenu au moins 5 points
-
-            refJoueur=0;
+            int refJoueur = 0;
             System.out.println("Round " + witchHunt.round);
 
+            //choix du rÙle pour chaque joueur
+            for (int k = 0; k < nbrJoueurVirtuel + nbrJoueurReel; k++) {
+                System.out.println("Joueur " + tabjoueur.get(k).getNom());
+                tabjoueur.get(k).choisirRole();
+            }
 
-            while (refJoueur < tabjoueur.size()) { //tant que tout les joueurs n'ont pas jou√© sur un round
-
-                //choix du r√¥le pour chaque joueur
-                for (int k = 0; k < nbJoueurV + nbJoueurR; k++) {
-                    System.out.println("Joueur " + tabjoueur.get(k).getNom());
-                    tabjoueur.get(k).choisirRole();
-                }
-
-                JeuCarte jeuCarte = new JeuCarte(); //on cr√©e un nouveau jeu de carte
-
-                jeuCarte.melanger();//on m√©lange les cartes
-
-                witchHunt.distribuerCartesRumours();//distribuer les cartes
-
-                witchHunt.getTabjoueur().get(refJoueur).setTour(true);
-
-                while (witchHunt.terminerTour() == false) {
-                    witchHunt.commencerJeu();
-                }
+            witchHunt.jeuCarte = new JeuCarte(); //on crÈe un nouveau jeu de carte
 
 
-                refJoueur++;
+            witchHunt.distribuerCartesRumours();//distribuer les cartes
 
+            witchHunt.getTabjoueur().get(refJoueur).setTour(true);
 
-                int z=0;
-                while (witchHunt.getTabjoueurSup().size() !=0){
-                    witchHunt.getTabjoueur().add(witchHunt.getTabjoueurSup().get(z));
-                    witchHunt.getTabjoueurSup().remove(witchHunt.getTabjoueurSup().get(z));
-                }
-
-
-
-                for (int i = 0; i < tabjoueur.size(); i++){
-                    if (tabjoueur.get(i).isIdEstRevele() == false){
-                        if (tabjoueur.get(i).getIdentite().equals(Role.Villager)) {
-                            tabjoueur.get(i).setPoints(tabjoueur.get(i).getPoints() + 1);
-                        }
-                        else {
-                            tabjoueur.get(i).setPoints(tabjoueur.get(i).getPoints() + 2);
-                        }
+            while (witchHunt.terminerTour() == false) {
+                witchHunt.commencerJeu();
+            }
+            int z = 0;
+            while (witchHunt.getTabjoueurSup().size() != 0) {
+                witchHunt.getTabjoueur().add(witchHunt.getTabjoueurSup().get(z));
+                witchHunt.getTabjoueurSup().remove(witchHunt.getTabjoueurSup().get(z));
+            }
+            for (int j = 0; j < witchHunt.getTabjoueur().size(); j++) {
+                tabjoueur.get(j).setTour(false);
+            }
+            for (int i = 0; i < tabjoueur.size(); i++) {
+                if (tabjoueur.get(i).isIdEstRevele() == false) {
+                    System.out.println("Joueur " + tabjoueur.get(i).getNom() + " a gagnÈ ce tour");
+                    if (tabjoueur.get(i).getIdentite().equals(Role.Villager)) {
+                        tabjoueur.get(i).setPoints(tabjoueur.get(i).getPoints() + 1);
+                    } else {
+                        tabjoueur.get(i).setPoints(tabjoueur.get(i).getPoints() + 2);
                     }
+                    tabjoueur.get(i).setTour(true);
                 }
-                for (int j =0; j< witchHunt.getTabjoueur().size(); j++){
-                    witchHunt.getTabjoueur().get(j).setIdEstRevele(false);
-                    witchHunt.getTabjoueur().get(j).getCarteJoueurMain().clear();
-                    witchHunt.getTabjoueur().get(j).getCarteJoueurPlateau().clear();
-                }
-                for (int i = 0; i < tabjoueur.size(); i++) { //affichage des points de chaque joueur √† la fin d'un round
-                    System.out.println(tabjoueur.get(i).getNom() + " vous avez : " + tabjoueur.get(i).getPoints() + " points.");
-                }
-
+            }
+            for (int j = 0; j < witchHunt.getTabjoueur().size(); j++) {
+                witchHunt.getTabjoueur().get(j).setIdEstRevele(false);
+                witchHunt.getTabjoueur().get(j).getCarteJoueurMain().clear();
+                witchHunt.getTabjoueur().get(j).getCarteJoueurPlateau().clear();
 
             }
 
-            System.out.println("Fin du round " + witchHunt.round);
-            witchHunt.round++;
+            for (int i = 0; i < tabjoueur.size(); i++) { //affichage des points de chaque joueur ‡ la fin d'un round
+                System.out.println(tabjoueur.get(i).getNom() + " vous avez : " + tabjoueur.get(i).getPoints() + " points.");
+            }
+            System.out.println("Fin du round " + witchHunt.getRound());
+            witchHunt.setRound(witchHunt.getRound() + 1);
 
         }
+        witchHunt.annonceLeGagnantJeu();
     }
-
-
-
-
-    }
+}
